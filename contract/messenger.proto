@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "https://github.com/movaua/grpc-messenger/contract";
+
+package contract;
+
+service Messenger {
+  rpc Chat(stream Request) returns (stream Response) {}
+}
+
+message Request { string text = 1; }
+
+message Response {
+  string user = 1;
+  string text = 2;
+}
