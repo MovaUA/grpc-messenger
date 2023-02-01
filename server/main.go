@@ -10,12 +10,14 @@ import (
 	"os/signal"
 
 	pb "github.com/movaua/grpc-messenger/contract"
+	"github.com/movaua/grpc-messenger/server/broadcast"
+	"github.com/movaua/grpc-messenger/server/messenger"
 	"google.golang.org/grpc"
 )
 
 var (
 	port                = flag.Int("port", 8080, "The server port")
-	responseBroadcaster ResponseBroadcastServer
+	responseBroadcaster broadcast.ResponseBroadcastServer
 )
 
 func main() {
@@ -27,10 +29,10 @@ func main() {
 	}
 
 	ctx := NewAppContext()
-	responseBroadcaster = NewResponseBroadcastServer(ctx)
+	responseBroadcaster = broadcast.NewResponseBroadcastServer(ctx)
 
 	s := grpc.NewServer()
-	pb.RegisterMessengerServer(s, NewMessengerServer(responseBroadcaster))
+	pb.RegisterMessengerServer(s, messenger.NewMessengerServer(responseBroadcaster))
 
 	log.Printf("server listening at %v", lis.Addr())
 
