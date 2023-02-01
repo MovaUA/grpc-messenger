@@ -1,22 +1,23 @@
-package main
+package messenger
 
 import (
 	"io"
 	"log"
 
 	pb "github.com/movaua/grpc-messenger/contract"
+	"github.com/movaua/grpc-messenger/server/broadcast"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
-func NewMessengerServer(responseBroadcaster ResponseBroadcastServer) pb.MessengerServer {
+func NewMessengerServer(responseBroadcaster broadcast.ResponseBroadcastServer) pb.MessengerServer {
 	return &messengerServer{
 		responseBroadcaster: responseBroadcaster}
 }
 
 type messengerServer struct {
-	responseBroadcaster ResponseBroadcastServer
+	responseBroadcaster broadcast.ResponseBroadcastServer
 	stream              pb.Messenger_ChatServer
 	pb.UnimplementedMessengerServer
 }
