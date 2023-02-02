@@ -9,10 +9,12 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
 	pb "github.com/movaua/grpc-messenger/contract"
@@ -38,6 +40,12 @@ func main() {
 		transportCredentials = insecure.NewCredentials()
 	}
 	opts = append(opts, grpc.WithTransportCredentials(transportCredentials))
+
+	opts = append(opts, grpc.WithKeepaliveParams(keepalive.ClientParameters{
+		Time:                60 * time.Second,
+		Timeout:             30 * time.Second,
+		PermitWithoutStream: false,
+	}))
 
 	// Anything linked to this variable will transmit request headers.
 	md := metadata.New(map[string]string{"x-user": *user})

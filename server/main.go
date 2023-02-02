@@ -8,11 +8,13 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"time"
 
 	pb "github.com/movaua/grpc-messenger/contract"
 	"github.com/movaua/grpc-messenger/server/broadcast"
 	"github.com/movaua/grpc-messenger/server/messenger"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 var (
@@ -31,7 +33,20 @@ func main() {
 	ctx := NewAppContext()
 	responseBroadcaster = broadcast.NewResponseBroadcastServer(ctx)
 
-	s := grpc.NewServer()
+	var opts []grpc.ServerOption
+	opts = append(opts, grpc.KeepaliveParams(keepalive.ServerParameters{
+		MaxConnectionIdle:     120 * time.Second,
+		MaxConnectionAge:      1<<63 - 1, // infinity
+		MaxConnectionAgeGrace: 1<<63 - 1, // infinity
+		Time:                  60 * time.Second,
+		Timeout:               30 * time.Second,
+	}))
+	opts = append(opts, grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+		MinTime:             9 * time.Second,
+		PermitWithoutStream: false,
+	}))
+
+	s := grpc.NewServer(opts...)
 	pb.RegisterMessengerServer(s, messenger.NewMessengerServer(responseBroadcaster))
 
 	log.Printf("server listening at %v", lis.Addr())
